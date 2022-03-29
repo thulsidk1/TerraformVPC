@@ -119,10 +119,7 @@ resource "tls_private_key" "example" {
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "generated_key" {
-  key_name   = "${var.key_name}"
-  public_key = tls_private_key.example.public_key_openssh
-}
+
 
 
 
@@ -130,9 +127,8 @@ resource "aws_instance" "testInstance" {
   ami           = "${var.instance_ami}"
   instance_type = "${var.instance_type}"
   subnet_id = "${aws_subnet.subnet_public.id}"
+	key_name = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
-  key_name = aws_key_pair.generated_key.key_name
-
   tags = {
 		"Environment" = "${var.environment_tag}"
 	}

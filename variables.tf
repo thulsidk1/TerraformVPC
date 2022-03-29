@@ -35,4 +35,3 @@ variable "environment_tag" {
   description = "Environment tag"
   default     = "Production"
 }
-variable "key_name" {}
