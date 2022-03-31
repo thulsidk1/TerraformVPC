@@ -15,18 +15,36 @@ variable "cidr_subnet1" {
   description = "CIDR block for the subnet1"
   default     = "10.1.1.0/28"
 }
+
+variable "cidr_subnet2" {
+  description = "CIDR block for the subnet1"
+  default     = "10.2.1.0/1"
+}
+
+variable "cidr_subnet3" {
+  description = "CIDR block for the subnet1"
+  default     = "10.3.1.0/1"
+}
 variable "availability_zone" {
   description = "availability zone to create subnet"
   default     = "us-east-2a"
 }
-variable "public_key_path" {
-  description = "Public key path"
-  default     = "//~/.ssh/id_rsa.pub"
+
+data "aws_ami" "my_awslinux" {
+owners = ["137112412989"] # AWS
+most_recent = true
+
+  filter {
+      name   = "name"
+      values = ["*-2.0.20180810-*"]
+  }
+
+  filter {
+      name   = "virtualization-type"
+      values = ["hvm"]
+  }
 }
-variable "instance_ami" {
-  description = "AMI for aws EC2 instance"
-  default     = "ami-0cf31d971a3ca20d6"
-}
+
 variable "instance_type" {
   description = "type for aws EC2 instance"
   default     = "t2.micro"
