@@ -1,37 +1,36 @@
-
 provider "aws" {
   region = var.region
 }
-
 
 resource "aws_vpc" "vpc" {
   cidr_block           = var.cidr_vpc
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-    tags = {
-      Environment = var.environment_tag
+  tags = {
+    Environment = var.environment_tag
   }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
-    tags = {
-      Environment = var.environment_tag
+  tags = {
+    Environment = var.environment_tag
   }
 }
 
 resource "aws_eip" "ip" {
- vpc =  true
+  vpc = true
 }
-resource "aws_nat_gateway" "natgw1" {
- allocation_id  =aws_eip.ip.id
-  subnet_id     =aws_subnet.subnet_public.id
 
-    tags = {
-      Environment =var.environment_tag
-    }
+resource "aws_nat_gateway" "natgw1" {
+  allocation_id = aws_eip.ip.id
+  subnet_id     = aws_subnet.subnet_public.id
+
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_subnet" "subnet_public" {
@@ -40,9 +39,9 @@ resource "aws_subnet" "subnet_public" {
   map_public_ip_on_launch = true
   availability_zone       = var.availability_zone
 
-    tags = {
-      Environment = var.environment_tag
-    }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_subnet" "subnet_private1" {
@@ -51,35 +50,35 @@ resource "aws_subnet" "subnet_private1" {
   map_public_ip_on_launch = true
   availability_zone       = var.availability_zone
 
-    tags = {
-      Environment = var.environment_tag
-    }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_route_table" "rtb_public" {
-  vpc_id         = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.igw.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
   }
 
-    tags = {
-      Environment = var.environment_tag
-    }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_route_table" "rtb_private1" {
-  vpc_id        = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_nat_gateway.natgw1.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.natgw1.id
   }
 
-    tags = {
-      Environment = var.environment_tag
-    }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_route_table_association" "rta_subnet_public" {
@@ -93,15 +92,14 @@ resource "aws_route_table_association" "rta_subnet_private1" {
 }
 
 resource "aws_security_group" "sg_22" {
-  name            = "sg_22"
-  vpc_id          = aws_vpc.vpc.id
+  name   = "sg_22"
+  vpc_id = aws_vpc.vpc.id
 
-  # SSH access from the VPC
   ingress {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.cidr_vpc, "49.37.173.251/32", "98.180.121.31/32"]
   }
 
   egress {
@@ -111,62 +109,31 @@ resource "aws_security_group" "sg_22" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-    tags = {
+  tags = {
     Environment = var.environment_tag
-    }
-}
-
-resource "aws_security_group" "sg_221" {
-  name            = "sg_221"
-  vpc_id          = aws_vpc.vpc.id
-
-  # SSH access from the VPC
-  ingress {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
   }
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-	egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-    tags = {
-      Environment = var.environment_tag
-    }
 }
 
 resource "aws_instance" "testInstance" {
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.subnet_public.id
-	key_name               = "lakshminarsimha"
+  key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
-    tags = {
-		  Environment = var.environment_tag
-	  }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
 
 resource "aws_instance" "testInstance1" {
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.subnet_private1.id
-	key_name               = "lakshminarsimha"
-  vpc_security_group_ids = [aws_security_group.sg_221.id]
+  key_name               = "lakshminarsimha"
+  vpc_security_group_ids = [aws_security_group.sg_22.id]
 
-    tags = {
-		  Environment = var.environment_tag
-	  }
+  tags = {
+    Environment = var.environment_tag
+  }
 }
