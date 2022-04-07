@@ -12,6 +12,11 @@ variable "cidr_subnet" {
   default     = "10.1.0.0/24"
 }
 
+variable "cidr_subnet1" {
+  description = "CIDR block for the subnet1"
+  default     = "10.1.1.0/28"
+}
+
 variable "cidr_subnet2" {
   description = "CIDR block for the subnet1"
   default     = "10.2.1.0/1"
@@ -36,8 +41,8 @@ data "aws_ami" "my_awslinux" {
     values = ["*-2.0.20180810-*"]
   }
   filter {
-      name   = "virtualization-type"
-      values = ["hvm"]
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 
