@@ -114,6 +114,12 @@ resource "aws_security_group" "sg_22" {
   }
 }
 
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.testInstance.id
+  allocation_id = aws_eip.example.id
+}
+
+
 resource "aws_instance" "testInstance" {
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
@@ -124,6 +130,10 @@ resource "aws_instance" "testInstance" {
   tags = {
     Environment = var.environment_tag
   }
+}
+
+resource "aws_eip" "example" {
+  vpc = true
 }
 
 resource "aws_instance" "testInstance1" {
