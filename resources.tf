@@ -8,7 +8,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.vpc_tag
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.igw_tag
   }
 }
 
@@ -29,29 +29,29 @@ resource "aws_nat_gateway" "natgw1" {
   subnet_id     = aws_subnet.subnet_public.id
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.nat_tag
   }
 }
 
 resource "aws_subnet" "subnet_public" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.cidr_subnet
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   availability_zone       = var.availability_zone
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.publicsubnet_tag
   }
 }
 
 resource "aws_subnet" "subnet_private1" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.cidr_subnet1
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   availability_zone       = var.availability_zone
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.privatesubnet_tag
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_route_table" "rtb_public" {
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.publicroutetable_tag
   }
 }
 
@@ -77,7 +77,7 @@ resource "aws_route_table" "rtb_private1" {
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.privateroutetable_tag
   }
 }
 
@@ -110,9 +110,15 @@ resource "aws_security_group" "sg_22" {
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.securitygroup_tag
   }
 }
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.testInstance.id
+  allocation_id = aws_eip.example.id
+}
+
 
 resource "aws_instance" "testInstance" {
   ami                    = data.aws_ami.my_awslinux.id
@@ -122,8 +128,12 @@ resource "aws_instance" "testInstance" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.awsinstance_tag
   }
+}
+
+resource "aws_eip" "example" {
+  vpc = true
 }
 
 resource "aws_instance" "testInstance1" {
@@ -134,6 +144,6 @@ resource "aws_instance" "testInstance1" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Environment = var.environment_tag
+    Environment = var.awsinstance1_tag
   }
 }
