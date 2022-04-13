@@ -144,6 +144,6 @@ resource "aws_instance" "testInstance1" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Environment = var.awsinstance1_tag
+    Name = var.awsinstance1_tag
   }
 }
