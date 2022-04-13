@@ -7,23 +7,31 @@ variable "cidr_vpc" {
   description = "CIDR block for the VPC"
   default     = "10.1.0.0/16"
 }
+
+variable "private_cidr"{
+type = list
+default = ["10.1.0.0/24" , "10.1.0.0/26"]
+description = "cidr for subnets"
+}
+
+
 variable "cidr_subnet" {
   description = "CIDR block for the subnet"
-  default     = "10.1.0.0/24"
+  default     = "10.22.0.0/26"
 }
 variable "cidr_subnet1" {
   description = "CIDR block for the subnet1"
-  default     = "10.1.1.0/28"
+  default     = "0.22.0.64/26"
 }
 
 variable "cidr_subnet2" {
   description = "CIDR block for the subnet1"
-  default     = "10.2.1.0/1"
+  default     = "10.22.8.0/24"
 }
 
 variable "cidr_subnet3" {
   description = "CIDR block for the subnet1"
-  default     = "10.3.1.0/1"
+  default     = "10.22.9.0/24"
 }
 variable "availability_zone" {
   description = "availability zone to create subnet"

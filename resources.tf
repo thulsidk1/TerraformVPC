@@ -44,14 +44,17 @@ resource "aws_subnet" "subnet_public" {
   }
 }
 
+
+
 resource "aws_subnet" "subnet_private1" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.cidr_subnet1
+  count                   = "${length(var.private_cidr)}"
+  vpc_id                  =  aws_vpc.vpc.id
+  cidr_block              =  element(var.private_cidr , count.index)
+  availability_zone       =  var.availability_zone
   map_public_ip_on_launch = false
-  availability_zone       = var.availability_zone
 
   tags = {
-    Name = var.privatesubnet_tag
+    Name = "var.privatesubnet_tag-${count.index+1}"
   }
 }
 
@@ -87,7 +90,8 @@ resource "aws_route_table_association" "rta_subnet_public" {
 }
 
 resource "aws_route_table_association" "rta_subnet_private1" {
-  subnet_id      = aws_subnet.subnet_private1.id
+  count          = "${length(var.private_cidr)}"
+  subnet_id      = element(aws_subnet.subnet_private1.*.id , count.index)
   route_table_id = aws_route_table.rtb_private1.id
 }
 
@@ -137,13 +141,14 @@ resource "aws_eip" "example" {
 }
 
 resource "aws_instance" "testInstance1" {
+  count                  = "${length(var.private_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.subnet_private1.id
+  subnet_id              = element(aws_subnet.subnet_private1.*.id , count.index)
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = var.awsinstance1_tag
+    Name = "var.awsinstance1_tag -${count.index+1}"
   }
 }
