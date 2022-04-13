@@ -5,23 +5,23 @@ variable "region" {
 }
 variable "cidr_vpc" {
   description = "CIDR block for the VPC"
-  default     = "10.1.0.0/16"
+  default     = "10.0.0.0/16"
 }
 
 variable "private_cidr"{
 type = list
-default = ["10.1.0.0/24" , "10.1.0.0/26"]
+default = ["10.0.2.0/24" , "10.0.3.0/24"]
 description = "cidr for subnets"
 }
 
 
 variable "cidr_subnet" {
   description = "CIDR block for the subnet"
-  default     = "10.22.0.0/26"
+  default     = "10.0.0.0/24"
 }
 variable "cidr_subnet1" {
   description = "CIDR block for the subnet1"
-  default     = "0.22.0.64/26"
+  default     = "10.0.1.0/24"
 }
 
 variable "cidr_subnet2" {
