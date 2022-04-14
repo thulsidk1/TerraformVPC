@@ -5,26 +5,23 @@ variable "region" {
 }
 variable "cidr_vpc" {
   description = "CIDR block for the VPC"
-  default     = "10.1.0.0/16"
-}
-variable "cidr_subnet" {
-  description = "CIDR block for the subnet"
-  default     = "10.1.0.0/24"
-}
-variable "cidr_subnet1" {
-  description = "CIDR block for the subnet1"
-  default     = "10.1.1.0/28"
+  default     = "10.0.0.0/16"
 }
 
-variable "cidr_subnet2" {
-  description = "CIDR block for the subnet1"
-  default     = "10.2.1.0/1"
+variable "private_cidr"{
+type = list
+default = ["10.0.2.0/24" , "10.0.3.0/24"]
+description = "cidr for subnets"
 }
 
-variable "cidr_subnet3" {
-  description = "CIDR block for the subnet1"
-  default     = "10.3.1.0/1"
+variable "public_cidr"{
+type = list
+default = ["10.0.0.0/24" , "10.0.1.0/24"]
+description = "cidr for subnets"
 }
+
+
+
 variable "availability_zone" {
   description = "availability zone to create subnet"
   default     = "us-east-2a"
