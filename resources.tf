@@ -110,7 +110,7 @@ resource "aws_security_group" "sg_22" {
   }
 
   tags = {
-    Name = var.securitygroup_tag
+    Name = var.environment_tag
   }
 }
 

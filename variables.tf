@@ -53,7 +53,3 @@ variable "environment_tag" {
   description = "Environment tag"
   default     = "Production"
 }
-variable "vpc_tag" {
-  description = "VPC tag"
-  default     = "VPC"
-}
