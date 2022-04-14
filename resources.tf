@@ -25,9 +25,8 @@ resource "aws_eip" "ip" {
 }
 
 resource "aws_nat_gateway" "natgw1" {
-  count          = "${length(var.public_cidr)}"
   allocation_id  = aws_eip.ip.id
-  subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
+  subnet_id      = element(aws_subnet.subnet_public.*.id , 0)
 
   tags = {
     Name = var.environment_tag
@@ -123,9 +122,8 @@ resource "aws_security_group" "sg_22" {
 }
 
 resource "aws_eip_association" "eip_assoc" {
-  count         = "${length(var.public_cidr)}"
-  instance_id   = element(aws_instance.testInstance.*.id , count.index)
-  allocation_id = aws_eip.example.id
+  instance_id   = element(aws_instance.testInstance.*.id , 0)
+  allocation_id = aws_eip.ip.id 
 }
 
 
