@@ -8,7 +8,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = var.vpc_tag
+    Name = var.environment_tag
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = var.igw_tag
+    Name = var.environment_tag
   }
 }
 
@@ -29,7 +29,7 @@ resource "aws_nat_gateway" "natgw1" {
   subnet_id     = aws_subnet.subnet_public.id
 
   tags = {
-    Name = var.nat_tag
+    Name = var.environment_tag
   }
 }
 
@@ -40,7 +40,7 @@ resource "aws_subnet" "subnet_public" {
   availability_zone       = var.availability_zone
 
   tags = {
-    Name = var.publicsubnet_tag
+    Name = var.environment_tag
   }
 }
 
@@ -51,7 +51,7 @@ resource "aws_subnet" "subnet_private1" {
   availability_zone       = var.availability_zone
 
   tags = {
-    Name = var.privatesubnet_tag
+    Name = var.environment_tag
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_route_table" "rtb_public" {
   }
 
   tags = {
-    Name = var.publicroutetable_tag
+    Name = var.environment_tag
   }
 }
 
@@ -77,7 +77,7 @@ resource "aws_route_table" "rtb_private1" {
   }
 
   tags = {
-    Name = var.privateroutetable_tag
+    Name = var.environment_tag
   }
 }
 
@@ -128,7 +128,7 @@ resource "aws_instance" "testInstance" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = var.awsinstance_tag
+    Name = var.environment_tag
   }
 }
 
@@ -144,6 +144,6 @@ resource "aws_instance" "testInstance1" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = var.awsinstance1_tag
+    Name = var.environment_tag
   }
 }
