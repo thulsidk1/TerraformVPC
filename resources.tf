@@ -8,7 +8,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.vpc_tag
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.igw_tag
   }
 }
 
@@ -25,33 +25,38 @@ resource "aws_eip" "ip" {
 }
 
 resource "aws_nat_gateway" "natgw1" {
-  allocation_id = aws_eip.ip.id
-  subnet_id     = aws_subnet.subnet_public.id
+  count          = "${length(var.public_cidr)}"
+  allocation_id  = aws_eip.ip.id
+  subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.nat_tag
   }
 }
 
 resource "aws_subnet" "subnet_public" {
+  count                    = "${length(var.public_cidr)}"
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.cidr_subnet
-  map_public_ip_on_launch = true
+  cidr_block              = element(var.public_cidr , count.index)
+  map_public_ip_on_launch = false
   availability_zone       = var.availability_zone
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.publicsubnet_tag
   }
 }
 
+
+
 resource "aws_subnet" "subnet_private1" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.cidr_subnet1
-  map_public_ip_on_launch = true
-  availability_zone       = var.availability_zone
+  count                   = "${length(var.private_cidr)}"
+  vpc_id                  =  aws_vpc.vpc.id
+  cidr_block              =  element(var.private_cidr , count.index)
+  availability_zone       =  var.availability_zone
+  map_public_ip_on_launch = false
 
   tags = {
-    Environment = var.environment_tag
+    Name = "var.privatesubnet_tag-${count.index+1}"
   }
 }
 
@@ -64,31 +69,34 @@ resource "aws_route_table" "rtb_public" {
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.publicroutetable_tag
   }
 }
 
 resource "aws_route_table" "rtb_private1" {
+  count          = "${length(var.public_cidr)}"
   vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.natgw1.id
+    gateway_id = element(aws_nat_gateway.natgw1.*.id , count.index)
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.privateroutetable_tag
   }
 }
 
 resource "aws_route_table_association" "rta_subnet_public" {
-  subnet_id      = aws_subnet.subnet_public.id
-  route_table_id = aws_route_table.rtb_public.id
+  count          = "${length(var.public_cidr)}"
+  subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
+  route_table_id = element(aws_route_table.rtb_public.*.id , count.index)
 }
 
 resource "aws_route_table_association" "rta_subnet_private1" {
-  subnet_id      = aws_subnet.subnet_private1.id
-  route_table_id = aws_route_table.rtb_private1.id
+  count          = "${length(var.private_cidr)}"
+  subnet_id      = element(aws_subnet.subnet_private1.*.id , count.index)
+  route_table_id = element(aws_route_table.rtb_private1.*.id , count.index)
 }
 
 resource "aws_security_group" "sg_22" {
@@ -110,30 +118,43 @@ resource "aws_security_group" "sg_22" {
   }
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.securitygroup_tag
   }
 }
 
+resource "aws_eip_association" "eip_assoc" {
+  count         = "${length(var.public_cidr)}"
+  instance_id   = element(aws_instance.testInstance.*.id , count.index)
+  allocation_id = aws_eip.example.id
+}
+
+
 resource "aws_instance" "testInstance" {
+  count                  = "${length(var.public_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.subnet_public.id
+  subnet_id              = element(aws_subnet.subnet_public.*.id , count.index)
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Environment = var.environment_tag
+    Name = var.awsinstance_tag
   }
+}
+
+resource "aws_eip" "example" {
+  vpc = true
 }
 
 resource "aws_instance" "testInstance1" {
+  count                  = "${length(var.private_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.subnet_private1.id
+  subnet_id              = element(aws_subnet.subnet_private1.*.id , count.index)
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Environment = var.environment_tag
+    Name = "var.awsinstance1_tag -${count.index+1}"
   }
 }
