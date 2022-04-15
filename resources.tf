@@ -26,7 +26,6 @@ resource "aws_eip" "ip" {
 }
 
 resource "aws_eip" "ip1" {
-  count                  = "${length(var.private_cidr)}"
   vpc = true
 }
 
@@ -129,18 +128,16 @@ resource "aws_security_group" "sg_22" {
 }
 
 resource "aws_eip_association" "eip_assoc" {
-  count         = "${length(var.public_cidr)}"
-  instance_id   = element(aws_instance.testInstance.*.id , count.index)
-  allocation_id = aws_eip.ip1[count.index].id
+  instance_id   = aws_instance.testInstance.id
+  allocation_id = aws_eip.ip1.id
 }
 
 
 
 resource "aws_instance" "testInstance" {
-  count                  = "${length(var.public_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = element(aws_subnet.subnet_public.*.id , count.index)
+  subnet_id              = aws_subnet.subnet_public[0].id
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
@@ -152,10 +149,9 @@ resource "aws_instance" "testInstance" {
 
 
 resource "aws_instance" "testInstance1" {
-  count                  = "${length(var.private_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = element(aws_subnet.subnet_private1.*.id , count.index)
+  subnet_id              = aws_subnet.subnet_private1[0].id
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
