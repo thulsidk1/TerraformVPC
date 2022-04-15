@@ -21,12 +21,18 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "ip" {
+  count                  = "${length(var.private_cidr)}"
+  vpc = true
+}
+
+resource "aws_eip" "ip1" {
+  count                  = "${length(var.private_cidr)}"
   vpc = true
 }
 
 resource "aws_nat_gateway" "natgw1" {
   count          = "${length(var.public_cidr)}"
-  allocation_id  = aws_eip.ip.id
+  allocation_id  =  aws_eip.ip[count.index].id
   subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
 
   tags = {
@@ -125,8 +131,9 @@ resource "aws_security_group" "sg_22" {
 resource "aws_eip_association" "eip_assoc" {
   count         = "${length(var.public_cidr)}"
   instance_id   = element(aws_instance.testInstance.*.id , count.index)
-  allocation_id = aws_eip.example.id
+  allocation_id = aws_eip.ip1[count.index].id
 }
+
 
 
 resource "aws_instance" "testInstance" {
@@ -142,9 +149,7 @@ resource "aws_instance" "testInstance" {
   }
 }
 
-resource "aws_eip" "example" {
-  vpc = true
-}
+
 
 resource "aws_instance" "testInstance1" {
   count                  = "${length(var.private_cidr)}"
@@ -155,6 +160,6 @@ resource "aws_instance" "testInstance1" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = var.environment_tag 
+    Name = var.environment_tag
   }
 }
