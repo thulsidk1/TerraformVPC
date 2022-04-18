@@ -24,9 +24,14 @@ resource "aws_eip" "ip" {
   vpc = true
 }
 
+resource "aws_eip" "ip1" {
+  vpc = true
+}
+
+
 resource "aws_nat_gateway" "natgw1" {
   count          = "${length(var.public_cidr)}"
-  allocation_id  = aws_eip.ip.id
+  allocation_id  =  aws_eip.ip[count.index].id
   subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
 
   tags = {
@@ -52,7 +57,7 @@ resource "aws_subnet" "subnet_private1" {
   count                   = "${length(var.private_cidr)}"
   vpc_id                  =  aws_vpc.vpc.id
   cidr_block              =  element(var.private_cidr , count.index)
-  availability_zone       =  var.availability_zone
+  availability_zone       =  var.availability_zone1
   map_public_ip_on_launch = false
 
   tags = {
@@ -123,17 +128,15 @@ resource "aws_security_group" "sg_22" {
 }
 
 resource "aws_eip_association" "eip_assoc" {
-  count         = "${length(var.public_cidr)}"
-  instance_id   = element(aws_instance.testInstance.*.id , count.index)
-  allocation_id = aws_eip.example.id
+  instance_id   = aws_instance.testInstance.id
+  allocation_id = aws_eip.ip1.id
 }
 
 
 resource "aws_instance" "testInstance" {
-  count                  = "${length(var.public_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = element(aws_subnet.subnet_public.*.id , count.index)
+  subnet_id              = aws_subnet.subnet_public[0].id
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
@@ -147,14 +150,13 @@ resource "aws_eip" "example" {
 }
 
 resource "aws_instance" "testInstance1" {
-  count                  = "${length(var.private_cidr)}"
   ami                    = data.aws_ami.my_awslinux.id
   instance_type          = var.instance_type
-  subnet_id              = element(aws_subnet.subnet_private1.*.id , count.index)
+  subnet_id              = aws_subnet.subnet_private1[0].id
   key_name               = "lakshminarsimha"
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = var.environment_tag 
+    Name = var.environment_tag
   }
 }
