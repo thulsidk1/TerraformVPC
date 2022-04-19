@@ -26,7 +26,6 @@ resource "aws_eip" "ip" {
 
   tags = {
     Name = "${var.environment_tag}-eip-private${count.index}"
-
   }
 }
 
@@ -35,7 +34,6 @@ resource "aws_eip" "ip1" {
 
   tags = {
     Name = "${var.environment_tag}-eip-public"
-
   }
 }
 
@@ -98,7 +96,7 @@ resource "aws_route_table" "rtb_private1" {
   }
 
   tags = {
-    Name = "${var.environment_tag}-rtb_private1${count.index}"
+    Name = "${var.environment_tag}-rtb_private${count.index}"
   }
 }
 
@@ -151,7 +149,7 @@ resource "aws_instance" "testInstance" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = "${var.environment_tag}-testInstance"
+    Name = "${var.environment_tag}-public"
   }
 }
 
@@ -165,6 +163,6 @@ resource "aws_instance" "testInstance1" {
   vpc_security_group_ids = [aws_security_group.sg_22.id]
 
   tags = {
-    Name = "${var.environment_tag}-testInstance1"
+    Name = "${var.environment_tag}-private"
   }
 }

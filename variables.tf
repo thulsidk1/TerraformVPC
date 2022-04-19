@@ -32,7 +32,6 @@ variable "availability_zone1" {
   default     = "us-east-2b"
 }
 
-
 data "aws_ami" "my_awslinux" {
 owners = ["137112412989"] # AWS
 most_recent = true
