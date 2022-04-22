@@ -20,15 +20,12 @@ default = ["10.0.0.0/24" , "10.0.1.0/24"]
 description = "cidr for subnets"
 }
 
-variable "availability_zone" {
-  description = "availability zone to create subnet"
-  default     = "us-east-2a"
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
-variable "availability_zone1" {
-  description = "availability zone to create subnet1"
-  default     = "us-east-2b"
-}
+
 
 data "aws_ami" "my_awslinux" {
 owners = ["137112412989"] # AWS
