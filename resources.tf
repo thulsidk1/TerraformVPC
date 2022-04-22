@@ -21,6 +21,11 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "ip" {
+  count =length(var.public_cidr)
+  vpc   = true
+}
+
+resource "aws_eip" "ip1" {
   vpc = true
 }
 
@@ -30,17 +35,17 @@ resource "aws_eip" "ip1" {
 
 
 resource "aws_nat_gateway" "natgw1" {
-  count          = "${length(var.public_cidr)}"
-  allocation_id  =  aws_eip.ip[count.index].id
+  count          = length(var.public_cidr)
+  allocation_id  = aws_eip.ip[count.index].id
   subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
-
+  
   tags = {
     Name = var.environment_tag
   }
 }
 
 resource "aws_subnet" "subnet_public" {
-  count                    = "${length(var.public_cidr)}"
+  count                   = length(var.public_cidr)
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = element(var.public_cidr , count.index)
   map_public_ip_on_launch = false
