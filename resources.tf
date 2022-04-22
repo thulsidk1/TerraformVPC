@@ -21,8 +21,8 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "ip" {
-  count         =length(var.public_cidr)
-  vpc = true
+  count =length(var.public_cidr)
+  vpc   = true
 }
 
 resource "aws_eip" "ip1" {
