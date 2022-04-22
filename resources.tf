@@ -21,8 +21,8 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "ip" {
-  count                  = "${length(var.private_cidr)}"
-  vpc = true
+  count = length(var.private_cidr)
+  vpc   = true
 
   tags = {
     Name = "${var.environment_tag}-eip-private${count.index}"
@@ -37,22 +37,23 @@ resource "aws_eip" "ip1" {
   }
 }
 
-resource "aws_nat_gateway" "natgw1" {
-  count          = "${length(var.public_cidr)}"
-  allocation_id  = aws_eip.ip.id
-  subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
 
+resource "aws_nat_gateway" "natgw1" {
+  count          = length(var.public_cidr)
+  allocation_id  = aws_eip.ip[count.index].id
+  subnet_id      = element(aws_subnet.subnet_public.*.id , count.index)
+  
   tags = {
     Name = "${var.environment_tag}-natgw${count.index}"
   }
 }
 
 resource "aws_subnet" "subnet_public" {
-  count                    = "${length(var.public_cidr)}"
+  count                   = length(var.public_cidr)
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = element(var.public_cidr , count.index)
   map_public_ip_on_launch = false
-  availability_zone       = var.availability_zone
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
 
   tags = {
     Name = "${var.environment_tag}-subnet_public${count.index}"
@@ -65,7 +66,7 @@ resource "aws_subnet" "subnet_private1" {
   count                   = "${length(var.private_cidr)}"
   vpc_id                  =  aws_vpc.vpc.id
   cidr_block              =  element(var.private_cidr , count.index)
-  availability_zone       =  var.availability_zone
+  availability_zone       =  data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = false
 
   tags = {
